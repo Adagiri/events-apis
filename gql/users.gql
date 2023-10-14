@@ -1,0 +1,189 @@
+extend type Query {
+  "Get information about the logged-in user"
+  user: User!
+  "Get information about a certain user"
+  user_getById(id: ID!): User!
+  user_getSubscriptionInfo: SubscriptionInfo!
+}
+
+extend type Mutation {
+  "Get information about a certain user"
+  user_editProfile(name: String!, photo: String!): UserResponse!
+  "Register with Email & Password - Step 1"
+  auth_sendVerificationCode(
+    email: String!
+    receiveNewsletter: Boolean!
+  ): DefaultResponse!
+  "Register with Email & Password"
+  auth_resendVerificationCode(token: String!): DefaultResponse!
+  "Register with Email & Password - Step 2"
+  auth_verifyEmail(token: String!, code: String!): DefaultResponse!
+  "Register with Email & Password - Step 3 (Final)"
+  auth_register(
+    token: String!
+    name: String!
+    password: String!
+    timeZone: String!
+  ): UserResponse!
+  "Register using google"
+  auth_registerWithGoogle(
+    name: String
+    email: String
+    ssoGoogleId: String!
+    photo: String
+    receiveNewsletter: Boolean!
+    timeZone: String!
+  ): UserResponse!
+  "Register using apple"
+  auth_registerWithApple(
+    name: String
+    email: String
+    ssoAppleId: String!
+    photo: String
+    receiveNewsletter: Boolean!
+    timeZone: String!
+  ): UserResponse!
+  "Login with email and password"
+  auth_login(
+    email: String!
+    password: String!
+    deviceType: DeviceTypes!
+    timeZone: String!
+  ): UserResponse!
+  "Login using google"
+  auth_loginWithGoogle(
+    name: String
+    email: String
+    ssoGoogleId: String!
+    photo: String
+    deviceType: DeviceTypes!
+    timeZone: String!
+  ): UserResponse!
+  "Login using apple"
+  auth_loginWithApple(
+    name: String
+    email: String
+    ssoAppleId: String!
+    photo: String
+    deviceType: DeviceTypes!
+    timeZone: String!
+  ): UserResponse!
+
+  "Logout"
+  auth_logout(deviceType: DeviceTypes!): UserResponse!
+
+  "Resetting password- step 1"
+  auth_sendResetPasswordMail(email: String!): DefaultResponse!
+  "Resend reset password mail"
+  auth_resendResetPasswordMail(token: String!): DefaultResponse!
+  "Resetting password- step 2"
+  auth_verifyResetPasswordCode(token: String!, code: String!): DefaultResponse!
+  "Resetting password- step 3"
+  auth_resetPassword(token: String!, password: String!): DefaultResponse!
+  "This endpoint is the one that should be used on the app"
+  user_deleteAccount: UserResponse!
+  "This endpoint is just for testing purposes"
+  user_deleteAccountByEmail(email: String!): UserResponse!
+}
+
+type UserResponse {
+  code: String!
+  success: Boolean!
+  error: String
+  data: User
+  "User authentication token"
+  token: String
+}
+
+type User {
+  _id: ID!
+  email: String
+  name: String
+  photo: String
+  registeredWith: String
+  "Apple account Id of the user. This field will be null if the user never authenticated with Apple"
+  ssoAppleId: String
+  "Google account Id of the user. This field will be null if the user never authenticated with Google"
+  ssoGoogleId: String
+  "Total new notifications that a user has"
+  newNotifications: Int!
+  unreadNotifications: Int!
+  "Settings - Push notification"
+  pushNotifSettings: PushNotifSettings
+  "Settings - Email notification"
+  emailNotifSettings: EmailNotifSettings
+  "Newsletter settings"
+  newsletterSettings: NewsletterSettings
+  "Subscription Info"
+  subscriptionInfo: SubscriptionInfo
+  isGoogleCalendarApiAuthorized: Boolean!
+}
+
+type SubscriptionInfo {
+  appStoreUserUUID: String
+  hasUsedFreeTrial: Boolean
+  isFreeTrialActive: Boolean
+  freeTrialExpiryDate: DateTime
+  isPremiumActive: Boolean
+  platform: String
+  startDate: DateTime
+  expiryDate: DateTime
+  appStore: SubscriptionInfoAppStore
+}
+
+type PushNotifSettings {
+  eventInvite: Boolean!
+  eventDelete: Boolean!
+  eventInvitationAcceptance: Boolean!
+  eventInvitationRejection: Boolean!
+  inviteeRemoved: Boolean!
+  eventRoleAssigned: Boolean!
+  todoCompleted: Boolean!
+  todoUnmarked: Boolean!
+  todoAdded: Boolean!
+  todoDeleted: Boolean!
+  todoEdited: Boolean!
+  routineAdded: Boolean!
+  routineEdited: Boolean!
+  routineDeleted: Boolean!
+  routineCompleted: Boolean!
+  directMessaging: Boolean!
+}
+
+type EmailNotifSettings {
+  eventInvite: Boolean!
+  eventDelete: Boolean!
+  eventInvitationAcceptance: Boolean!
+  eventInvitationRejection: Boolean!
+  inviteeRemoved: Boolean!
+  eventRoleAssigned: Boolean!
+  todoCompleted: Boolean!
+  todoUnmarked: Boolean!
+  todoAdded: Boolean!
+  todoDeleted: Boolean!
+  todoEdited: Boolean!
+  routineAdded: Boolean!
+  routineEdited: Boolean!
+  routineDeleted: Boolean!
+  routineCompleted: Boolean!
+  directMessaging: Boolean!
+}
+
+type NewsletterSettings {
+  announcementAndOffers: Boolean!
+  featuresAnnouncement: Boolean!
+}
+
+type SubscriptionInfoAppStore {
+  originalTransactionId: String
+  transactionId: String
+  productType: String
+  startDate: Date
+  expiryDate: Date
+  isRenewable: Boolean
+}
+
+enum SubscriptionTypes {
+  Monthly
+  Yearly
+}

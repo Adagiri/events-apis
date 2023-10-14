@@ -1,0 +1,26 @@
+extend type Query {
+  calendar_getAppleAccessToken: String
+}
+
+extend type Mutation {
+  calendar_setAppleAccessToken(accessToken: String!): DefaultResponse!
+  calendar_saveAppleCalendarEvents(
+    events: [AppleEventInput!]!
+  ): DefaultResponse!
+  calendar_setGoogleRefreshToken(authorizationCode: String!): DefaultResponse!
+  calendar_importGoogleCalendarEvents: DefaultResponse!
+}
+
+input AppleEventInput {
+  id: String!
+  title: String!
+  start: String!
+  end: String!
+  location: String
+  attendees: [AppleEventAttendeeInput!]
+}
+
+input AppleEventAttendeeInput {
+  email: String!
+  name: String!
+}

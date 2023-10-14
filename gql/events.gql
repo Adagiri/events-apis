@@ -1,0 +1,388 @@
+extend type Query {
+  "Get events - [for logged-in user]"
+  events(status: EVENT_STATUS!): [Event]!
+  "Get an event by id - [for logged-in user]"
+  event_getById(id: ID!): Event!
+  event_getById_forInvitedUsers(id: ID!): Event!
+  event_getById_forInvitationLinks(id: ID!): Event!
+  """
+  Generate an invitaion link for an event.
+  This invitation link is to be generated before an event is created.
+  This endpoint should be called before the Invite tab in the event creation process.
+  The link can then be passed as an argument to the event_create api.
+  """
+  event_generateInviteLinkId: String!
+}
+
+extend type Mutation {
+  "Create an event"
+  event_create(input: CreateEventArgs!): EventResponse!
+  "Edit an event"
+  event_edit("Id of the event" id: ID!, input: EditEventArgs!): EventResponse!
+  "Delete an event"
+  event_delete("Id of the event" id: ID!): EventResponse!
+  event_toggleInviteLink(
+    "Id of the event"
+    id: ID!
+    "Indicates if link should be active or not"
+    isInviteLinkActive: Boolean!
+  ): EventResponse!
+
+  "Invite a user to an event"
+  event_inviteUsers(
+    "Id of the event"
+    id: ID!
+    "A list of emails to send invitation to"
+    invitedEmails: [String!]!
+  ): EventResponse!
+
+  event_acceptInvitation(
+    "Id of the event"
+    id: ID!
+    "Indicates if this endpoint is been triggered in response to a notification"
+    viaNotification: Boolean!
+  ): EventResponse!
+
+  event_rejectInvitation(
+    "Id of the event"
+    id: ID!
+    "Indicates if this endpoint is been triggered in response to a notification"
+    viaNotification: Boolean!
+  ): EventResponse!
+
+  event_acceptInvitationViaInviteLink("Id of the event" id: ID!): EventResponse!
+
+  event_rejectInvitationViaInviteLink("Id of the event" id: ID!): EventResponse!
+
+  event_removeInvitee(
+    "Id of the event"
+    id: ID!
+    "Id of the invitee who is to be removed"
+    inviteeId: ID!
+  ): InviteeResponse!
+
+  "Assign role to an invitee"
+  event_assignRoleToInvitee(
+    "Id of the event"
+    id: ID!
+    "Id of the invitee"
+    inviteeId: ID!
+    "Role to assign to invitee"
+    role: INVITEE_ROLES!
+  ): InviteeResponse!
+
+  "Add a todo to an event"
+  event_addTodo(
+    "Id of the event which the todo belongs to"
+    id: ID!
+    "Title of the todo"
+    title: String!
+    "Todo notes"
+    note: String!
+    isCompleted: Boolean!
+  ): TodoResponse!
+  "Edit a todo of an event"
+  event_editTodo(
+    "Id of the event which the todo belongs to"
+    id: ID!
+    "Id of the todo which is been edited"
+    todoId: ID!
+    title: String!
+    note: String!
+    isCompleted: Boolean!
+  ): TodoResponse!
+  "Delete a todo from an event"
+  event_deleteTodo(
+    "Id of the event which the todo belongs to"
+    id: ID!
+    "Id of the todo which is be deleted"
+    todoId: ID!
+  ): TodoResponse!
+  "Duplicate a todo in an event"
+  event_duplicateTodo(
+    "Id of the event which the todo belongs to"
+    id: ID!
+    "Id of the todo to be duplicated"
+    todoId: ID!
+  ): TodoResponse!
+  "Change a todo's status to either completed or uncompleted"
+  event_markTodo(
+    "Id of the event which the todo belongs to"
+    id: ID!
+    "Id of the todo to be marked"
+    todoId: ID!
+    "Indicates if todo is completed or not"
+    isCompleted: Boolean!
+  ): TodoResponse!
+
+  "Add a routine for an event"
+  event_addRoutine(
+    "ID of the event the routine belongs to"
+    id: ID!
+    input: RoutineArgs!
+  ): RoutineResponse!
+  "Edit an event routine"
+  event_editRoutine(
+    "ID of the event the routine belongs to"
+    id: ID!
+    "Routine ID"
+    routineId: ID!
+    input: RoutineArgs!
+  ): RoutineResponse!
+  "Delete an event routine"
+  event_deleteRoutine(
+    "ID of the event the routine belongs to"
+    id: ID!
+    "Routine ID"
+    routineId: ID!
+  ): RoutineResponse!
+}
+
+type Event {
+  _id: ID!
+  "Event name"
+  title: String!
+  "Event description"
+  description: String
+  "Indicates if the event will last for the whole day"
+  isAllDay: Boolean!
+  "Event start time"
+  date: DateTime!
+  "Event end time"
+  endDate: DateTime!
+  "Number of todos in the event"
+  todoCount: Int!
+  "The todos of the event"
+  todos: [Todo]
+  "The routine(s) for the event"
+  routines: [Routine]
+  location: EventLocation
+  "The background image of the event"
+  bgCover: String!
+  """
+  A string of 8 characters that is unique to each event. e.g - 90725902
+  To be appended to the domain name that serves as invitation link to an event. e.g - https://evens.io/90725902
+  """
+  inviteLinkId: String!
+  "Indicates if the invitation link is active or not"
+  isInviteLinkActive: Boolean!
+  "List of emails of which an -event invitation- has been sent to"
+  invitedEmails: [String]!
+  "List of invitees who have accepted the invitation"
+  invitees: [Invitee]!
+  "Information about the event creator"
+  owner: EventOwner!
+  "Role of the user displaying this event"
+  myRole: INVITEE_ROLES
+  "Indicates where the event was originally from"
+  platformSource: EVENT_INITIAL_SOURCE
+  "Id of the event on it's original source"
+  platformSourceId: String
+
+  customReminderConfiguration: EventReminderConfiguration
+  repeatConfiguration: EventRepeatConfiguration
+
+  createdAt: DateTime!
+  id: String
+}
+
+type EventResponse {
+  code: String!
+  success: Boolean!
+  error: String
+  data: Event!
+}
+
+type TodoResponse {
+  code: String!
+  success: Boolean!
+  error: String
+  data: Todo!
+}
+
+type RoutineResponse {
+  code: String!
+  success: Boolean!
+  error: String
+  data: Routine!
+}
+
+type InviteeResponse {
+  code: String!
+  success: Boolean!
+  error: String
+  data: Invitee!
+}
+
+type Todo {
+  _id: ID!
+  title: String!
+  note: String
+  isCompleted: Boolean!
+  id: String
+}
+
+type Routine {
+  _id: ID!
+  name: String!
+  phone: String
+  country: String
+  subject: String
+  email: String
+  note: String
+  routineType: ROUTINE_TYPE!
+  id: String
+}
+
+type Invitee {
+  _id: ID!
+  name: String
+  email: String
+  photo: String
+  role: INVITEE_ROLES!
+  id: String
+}
+
+type EventOwner {
+  _id: ID!
+  name: String
+  email: String
+  photo: String
+  id: String
+}
+
+type EventLocation {
+  longitude: Float
+  latitude: Float
+  address: String
+  country: String
+  state: String
+  city: String
+}
+
+type EventReminderConfiguration {
+  unit: EventReminderUnit
+  number: Int
+}
+
+type EventRepeatConfiguration {
+  unit: EventRepeatUnit
+  sequence: Int
+  isEnabled: Boolean!
+  endTime: DateTime
+}
+
+# Inputs
+input CreateEventArgs {
+  title: String!
+  description: String
+  isAllDay: Boolean
+  date: DateTime!
+  endDate: DateTime!
+  customReminderConfiguration: EventReminderConfigurationInput
+  "The background image of the event"
+  bgCover: String!
+  "Todos which the user added during creation of the event"
+  todos: [TodoArgs!]
+  "Routine(s) added for an event during event creation"
+  routines: [RoutineArgs!]
+  "List of emails to send invitation to"
+  invitedEmails: [String]!
+  "List of invitees who have accepted the invitation"
+  isInviteLinkActive: Boolean!
+  location: EventLocationInput
+
+  repeatConfiguration: EventRepeatConfigurationInput!
+}
+
+input EventLocationInput {
+  longitude: Float!
+  latitude: Float!
+  address: String
+  country: String
+  state: String
+  city: String
+}
+
+# Inputs
+input EditEventArgs {
+  title: String!
+  description: String
+  isAllDay: Boolean
+  "Event start time"
+  date: DateTime!
+  "Event end time"
+  endDate: DateTime!
+  customReminderConfiguration: EventReminderConfigurationInput
+  "The background image of the event"
+  bgCover: String!
+  todos: [TodoArgs!]!
+  routines: [RoutineArgs!]!
+  invitedEmails: [String!]!
+  isInviteLinkActive: Boolean!
+  location: EventLocationInput
+  
+  repeatConfiguration: EventRepeatConfigurationInput!
+}
+
+input TodoArgs {
+  title: String!
+  note: String
+  isCompleted: Boolean!
+}
+
+input RoutineArgs {
+  "Name of the sender"
+  name: String!
+  "Phone number to send note to (if sms routine)"
+  phone: String
+  "Phone number country (if sms routine)"
+  country: String
+  "Email subject to send note to (if email routine)"
+  subject: String
+  "Email address to send note to (if email routine)"
+  email: String
+  "Routine note"
+  note: String!
+  "Routine type (sms or email)"
+  routineType: ROUTINE_TYPE!
+}
+
+input EventReminderConfigurationInput {
+  unit: EventReminderUnit!
+  number: Int!
+}
+
+input EventRepeatConfigurationInput {
+  unit: EventRepeatUnit
+  sequence: Int
+  isEnabled: Boolean!
+  endTime: DateTime!
+}
+# Enums
+enum ROUTINE_TYPE {
+  "Routine to be executed via mail"
+  email
+  "Routine to be executed via sms"
+  sms
+}
+
+enum EVENT_INITIAL_SOURCE {
+  Custom
+  Google
+  Apple
+}
+
+enum EventReminderUnit {
+  week
+  day
+  hour
+  minute
+}
+
+enum EventRepeatUnit {
+  year
+  month
+  week
+  day
+}

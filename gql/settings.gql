@@ -1,0 +1,60 @@
+extend type Mutation {
+  "Save push notification token"
+  settings_savePushNotificationToken(
+    token: String!
+    platform: PushNotificationPlatforms!
+  ): UserResponse!
+  "Get information about a certain user"
+  settings_editProfile(name: String, photo: String): UserResponse!
+  "Change a user's password"
+  settings_changePassword(
+    oldPassword: String!
+    newPassword: String!
+  ): DefaultResponse!
+  "Edit event"
+  settings_editEvent(
+    defaultReminderConfiguration: EventReminderConfigurationInput!
+    timeZone: String!
+  ): DefaultResponse!
+  "Receive a verification code to the new email - change email"
+  settings_changeEmail_sendCode(
+    newEmail: String!
+    oldEmail: String!
+  ): DefaultResponse!
+  "Verify the code sent to the new email - change email"
+  settings_changeEmail_verifyEmail(token: String!, code: String!): UserResponse!
+  "Delete user account"
+  settings_deleteAccount: UserResponse!
+  "Edit notifications settings"
+  settings_editNotification(input: EditNotificationInput!): UserResponse!
+  settings_updateIosAppVersion(version: String!): DefaultResponse!
+}
+
+input EditNotificationInput {
+  pushNotifEventInvite: Boolean!
+  pushNotifEventDelete: Boolean!
+  pushNotifEventInvitationAcceptance: Boolean!
+  pushNotifEventInvitationRejection: Boolean!
+  pushNotifInviteeRemoved: Boolean!
+  pushNotifEventRoleAssigned: Boolean!
+  pushNotifTodoCompleted: Boolean!
+  pushNotifTodoUnmarked: Boolean!
+  pushNotifTodoAdded: Boolean!
+  pushNotifTodoEdited: Boolean!
+  pushNotifTodoDeleted: Boolean!
+  pushNotifDirectMessaging: Boolean!
+  emailNotifEventInvite: Boolean!
+  emailNotifEventDelete: Boolean!
+  emailNotifEventInvitationAcceptance: Boolean!
+  emailNotifEventInvitationRejection: Boolean!
+  emailNotifInviteeRemoved: Boolean!
+  emailNotifEventRoleAssigned: Boolean!
+  emailNotifTodoCompleted: Boolean!
+  emailNotifTodoUnmarked: Boolean!
+  emailNotifTodoAdded: Boolean!
+  emailNotifTodoEdited: Boolean!
+  emailNotifTodoDeleted: Boolean!
+  emailNotifDirectMessaging: Boolean!
+  newsLetterFeaturesAnnouncement: Boolean!
+  newsLetterAnnouncementAndOffers: Boolean!
+}

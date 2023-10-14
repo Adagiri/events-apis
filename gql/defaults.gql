@@ -1,0 +1,104 @@
+scalar Date
+scalar Time
+scalar DateTime
+scalar DefaultDate
+scalar Any
+scalar Number
+scalar AnyObject
+scalar Odd
+
+type Query {
+  _: Int
+}
+
+type Mutation {
+  _: Int
+}
+
+type DefaultResponse {
+  code: String!
+  success: Boolean!
+  error: String
+  token: String
+}
+
+type Pagination {
+  "Id of the element to use as a cursor for the next page"
+  nextcursor: String
+  "Total documents in the database for the use case"
+  totalDocs: Int!
+  "Total documents returned for the current query"
+  docsRetrieved: Int!
+  hasNextPage: Boolean!
+}
+
+# Types
+type Document {
+  title: String!
+  src: String!
+}
+
+type Tag {
+  key: String!
+  value: String!
+}
+
+type ListMetadata {
+  count: Int!
+}
+
+# Inputs
+
+input PaginationInput {
+  cursor: String
+  limit: Int
+}
+
+# Enums
+enum EVENT_STATUS {
+  "Get all events"
+  All
+  "Get events that will occur today or in the future"
+  Upcoming
+  "Get events that have passed"
+  Passed
+}
+
+enum INVITEE_ROLES {
+  Admin
+  Editor
+  Viewer
+  None
+}
+
+enum FILE_UPLOAD_PURPOSES {
+  Profile_Photo
+  Event_Backdrop
+}
+
+enum NotificationResourceType {
+  Event
+}
+
+enum DeviceTypes {
+  ANDROID
+  IOS
+}
+
+# Queries and Mutations
+extend type Query {
+  file_getUploadUrl(
+    "e.g image/png, image/jpeg"
+    contentType: String!
+    "reason for requesting upload url"
+    purpose: FILE_UPLOAD_PURPOSES!
+  ): FileUploadUrlResponse!
+}
+
+type FileUploadUrlResponse {
+  "A key is unique identifier string that should be append to a file-upload-domain. This string if of the form - /resource/011919383844849.png. If the file-upload-domain for media files is - https://media.evens.io, appending the key to the file-upload-domain will result in => https://media.evens.io/user/011919383844849.png"
+  key: String!
+  "The url where the file is to be uploaded to i.e (the PUT request is sent to)"
+  uploadUrl: String!
+}
+
